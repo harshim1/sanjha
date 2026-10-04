@@ -1,0 +1,17 @@
+# Render blueprint: one free web service. The model is prebuilt (app/model.json
+# is committed); the build installs only the serving dependencies (no model
+# fitting libraries) and seeds the demo database.
+services:
+  - type: web
+    name: sanjha
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements-runtime.txt && python -m app.seed
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: SANJHA_SALT
+        generateValue: true
+      - key: OFFICER_TOKEN
+        generateValue: true
