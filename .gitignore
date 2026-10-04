@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+app/sanjha.db
+sanjha_update.zip
+.env
+.DS_Store

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="sw">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sanjha</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1f5f4a">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>Sanjha</h1>
+  <select id="village" aria-label="Village"></select>
+  <span id="net" class="pill">…</span>
+</header>
+<nav>
+  <button data-tab="card" class="on">Card</button>
+  <button data-tab="decide">Sell or wait</button>
+  <button data-tab="share">Share</button>
+  <button data-tab="sim">SMS simulator</button>
+  <button data-tab="coop">Cooperative</button>
+</nav>
+
+<main>
+<section id="card" class="tab on">
+  <div class="sms">
+    <p id="card-sw" class="sw"></p>
+    <p id="card-en" class="en"></p>
+  </div>
+  <p><button id="listen" hidden>&#9654; Sikiliza (listen)</button></p>
+  <p id="card-meta" class="meta"></p>
+  <h2>Fair price, last 26 weeks and the next 8</h2>
+  <canvas id="fan" width="720" height="320"></canvas>
+  <p class="meta">Dark band: middle 50% of outcomes. Light band: middle 80%. The centre line stays flat because the futures price is already the market's forecast.</p>
+  <p id="sources" class="meta warn"></p>
+</section>
+
+<section id="decide" class="tab">
+  <p class="lead">Three choices side by side. Sanjha shows the odds and the bad case; the decision is yours.</p>
+  <label>Price offered today (KES/kg) <output id="offer-out"></output>
+    <input id="offer" type="range" min="200" max="700" step="5"></label>
+  <label>Cost of cash (% per month) <output id="rate-out"></output>
+    <input id="rate" type="range" min="0" max="15" step="0.5" value="5"></label>
+  <table id="choices"></table>
+  <p class="meta">Values are per kg in today's money, after storage loss and storage cost. "Bad case" is the outcome that 1 time in 10 is worse.</p>
+</section>
+
+<section id="share" class="tab">
+  <p class="lead">Vand Chhako: every offer a farmer shares narrows the range for the whole village.</p>
+  <label>An offer you were given (KES/kg)
+    <input id="share-price" type="number" min="50" max="3000" value="380"></label>
+  <button id="share-add">Add to the village (preview on this phone)</button>
+  <button id="share-reset" class="ghost">Reset</button>
+  <div id="share-bars"></div>
+  <p class="meta">This preview runs the same Kalman update on this phone, offline. To really share, send the price by SMS or USSD.</p>
+</section>
+
+<section id="sim" class="tab">
+  <p class="lead">What a farmer with a basic phone sees. Messages go to the same endpoint Africa's Talking calls.</p>
+  <div class="phone">
+    <div id="thread"></div>
+    <form id="sim-form">
+      <input id="sim-text" placeholder="wamenipa 340" autocomplete="off">
+      <button>Send</button>
+    </form>
+  </div>
+  <label>From <input id="sim-from" value="+254700000001"></label>
+  <p class="quick">Try:
+    <button class="ghost" data-say="bei ngapi leo?">bei ngapi leo?</button>
+    <button class="ghost" data-say="wamenipa 340">wamenipa 340</button>
+    <button class="ghost" data-say="nisubiri au niuze?">nisubiri au niuze?</button>
+    <button class="ghost" data-say="msaada">msaada</button>
+    <button class="ghost" data-say="acha">acha</button>
+  </p>
+</section>
+
+<section id="coop" class="tab">
+  <p class="lead">For the cooperative officer — the human in the loop.</p>
+  <table id="villages"></table>
+  <h2>Latest shared offers</h2>
+  <table id="reports"></table>
+  <p id="coop-meta" class="meta"></p>
+</section>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
