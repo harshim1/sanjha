@@ -1,4 +1,5 @@
 # Sanjha — data, forecast, backtest, local-gap tracking, decision layer, live SMS/USSD loop, offline web app
+https://sanjha.onrender.com
 
 Session 1 (hours 0-8): data pull, price decomposition, GARCH volatility,
 adaptive conformal calibration, and the backtest/scoring harness. Session 2
