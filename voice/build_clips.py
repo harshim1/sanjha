@@ -31,6 +31,7 @@ OUT_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "app", "web",
 API = "https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
 DEFAULT_VOICE = "21m00Tcm4TlvDq8ikWAM"  # an ElevenLabs premade voice; pick one that sounds right in Swahili
 DEFAULT_MODEL = "eleven_v3"
+MIN_CLIP_BYTES = 1500  # anything smaller is not a playable clip; regenerate it
 OUTPUT_FORMAT = "mp3_22050_32"  # small files: the whole library should stay well under 1 MB
 
 UNITS = ["moja", "mbili", "tatu", "nne", "tano", "sita", "saba", "nane", "tisa"]
@@ -66,11 +67,16 @@ def synthesize(text: str, key: str, voice: str, model: str) -> bytes:
     import httpx
 
     body = {"text": text, "model_id": model, "language_code": "sw"}
-    for attempt in range(2):
+    for attempt in range(3):
         r = httpx.post(API.format(voice_id=voice), params={"output_format": OUTPUT_FORMAT}, json=body,
                        headers={"xi-api-key": key}, timeout=60)
-        if r.status_code == 200:
+        if r.status_code == 200 and len(r.content) >= MIN_CLIP_BYTES:
             return r.content
+        if r.status_code == 200:  # the API sometimes returns an empty body for a very short word
+            if attempt == 0:
+                time.sleep(1)
+                continue
+            raise RuntimeError(f"ElevenLabs returned {len(r.content)} bytes of audio for {text!r}")
         if attempt == 0 and r.status_code in (400, 422) and "language_code" in body:
             body.pop("language_code")  # some models reject an explicit language code
             continue
@@ -94,7 +100,7 @@ def main(argv: list[str]) -> int:
     total = 0
     for cid, text in CLIPS.items():
         path = os.path.join(OUT_DIR, f"{cid}.mp3")
-        if os.path.exists(path) and "--force" not in argv:
+        if os.path.exists(path) and os.path.getsize(path) >= MIN_CLIP_BYTES and "--force" not in argv:
             total += os.path.getsize(path)
             continue
         audio = synthesize(text, key, voice, model)

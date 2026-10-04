@@ -93,13 +93,15 @@ Not done, and why:
   sandbox — it needs your account.
 - **Swahili templates are unreviewed.** Only the card and abstention lines
   come from the build reference; the other nine were drafted here.
-- **Voice clips are wired but not generated.** `voice/build_clips.py` makes
-  35 Swahili clips with ElevenLabs at build time (set `ELEVENLABS_API_KEY`,
-  run `python -m voice.build_clips`); the web app then shows a "Sikiliza"
-  button on the card and stitches the clips offline. No key was available
-  during the build, so no audio has been generated or listened to, and the
-  ElevenLabs call itself has not been run. Voice over a phone call to a
-  basic phone is not built.
+- **Voice clips are generated, except one.** `voice/build_clips.py` built
+  34 of 35 Swahili clips with ElevenLabs (312 KB total, `app/web/voice/`);
+  the web app shows a "Sikiliza" button on the card and stitches them
+  offline. `u4.mp3` ("nne" — four) came back empty — ElevenLabs sometimes
+  returns a 0-byte body for a very short word. A guard against this
+  (`MIN_CLIP_BYTES`, skip-and-retry) is written but not yet re-run against
+  the API. No one has listened to the clips yet, and the terms for the
+  ElevenLabs tier used have not been confirmed for commercial use (see
+  DATA.md). Voice over a phone call to a basic phone is not built.
 - **Agmarknet rerun** needs a data.gov.in key.
 - Set `SANJHA_SALT` (phone hashing) and `OFFICER_TOKEN` before any real use.
 
@@ -203,6 +205,10 @@ python3 -m charts.make_decision_charts     # writes the 2 session-3 PNGs into ch
 
 ## What the backtest found (real KC=F futures, 553 weekly forecasts, Oct 2015 - Oct 2026)
 
+![Price decomposition: futures price and recovered local gap](charts/decomposition_chart.png)
+![Reliability diagram: nominal vs achieved coverage](charts/reliability_diagram.png)
+![Adaptive band and rolling coverage through the 2024-25 spike](charts/coverage_spike.png)
+
 - Coverage: Sanjha 79.7% vs. an 80% target; the naive "last price +/-
   historical spread" baseline overcovers at 99.3% — uninformatively wide.
   The reliability diagram sits on the diagonal from 50% to 95% nominal.
@@ -238,6 +244,9 @@ information. Three causes, three changes:
    spike-regime coverage is one week worse (17 vs. 18 of 25).
 
 ## What the decision layer found (session 3)
+
+![The three choices this week, with probabilities and bad case](charts/decision_choices.png)
+![Risk-coverage curve: typical surprise vs. share of weeks answered](charts/risk_coverage.png)
 
 `models/decision.py` turns the band into the three choices. Waiting h weeks
 pays if `P_{t+h}(1 - s_h) - c_h > P_t (1 + r)^h`; the future price is drawn
@@ -283,6 +292,9 @@ cooperative, not measured values.
   See `charts/decision_choices.png`.
 
 ## What the local-gap Kalman filter + pooling found (synthetic region, 4 villages, 150 weeks)
+
+![Recovered vs true local gap per village, pooled vs unpooled](charts/village_gap_tracking.png)
+![Fake-report flood test: robust vs naive RMSE by adversarial share](charts/flood_test.png)
 
 `models/kalman.py` tracks b_{v,t} continuously between farmgate anchors from
 sparse, noisy, sometimes-adversarial farmer-reported offers, as a two-level
